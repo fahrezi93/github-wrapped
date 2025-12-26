@@ -1,65 +1,118 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
+import { fetchUserStats } from "./actions"; // Import Server Action
+import WrappedStory from "@/components/WrappedStory";
+import { WrappedStats } from "@/lib/utils";
+import { Github, Loader2, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="animate-spin" /> Generating...
+        </>
+      ) : (
+        <>
+          <Sparkles className="w-5 h-5" /> Generate Wrapped
+        </>
+      )}
+    </button>
+  );
+}
 
 export default function Home() {
+  const [data, setData] = useState<WrappedStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Wrapper for the server action to handle client state
+  async function handleSubmit(formData: FormData) {
+    setError(null);
+    setData(null);
+
+    const result = await fetchUserStats(formData);
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setData(result.data);
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#0a0a0a] overflow-hidden relative">
+      <AnimatePresence>
+        {data ? (
+          <motion.div
+            key="story"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <WrappedStory data={data} onClose={() => setData(null)} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="landing"
+            exit={{ opacity: 0, y: -20 }}
+            className="z-10 w-full max-w-md space-y-8 text-center"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="bg-white/10 p-4 rounded-full backdrop-blur-md mb-2">
+                <Github size={48} className="text-white" />
+              </div>
+              <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 tracking-tighter">
+                GitHub Wrapped
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Discover your coding personality for the year.
+              </p>
+            </div>
+
+            <form action={handleSubmit} className="w-full space-y-4 bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm">
+              <div className="text-left">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-400 ml-2 mb-1">
+                  GitHub Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  placeholder="torvalds"
+                  required
+                  className="w-full bg-black/40 border border-white/20 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <SubmitButton />
+            </form>
+
+            <p className="text-xs text-gray-600">
+              Not affiliated with GitHub • Built with Next.js 14
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Background gradients */}
+      <div className="fixed top-0 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 -right-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+    </main>
   );
 }
