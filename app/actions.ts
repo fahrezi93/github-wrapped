@@ -23,6 +23,22 @@ const query = `
             }
           }
         }
+        commitContributionsByRepository(maxRepositories: 5) {
+          repository {
+            name
+            description
+            stargazerCount
+            languages(first: 1) {
+              nodes {
+                name
+                color
+              }
+            }
+          }
+          contributions {
+            totalCount
+          }
+        }
       }
       topRepositories(first: 6, orderBy: {field: STARGAZERS, direction: DESC}) {
         nodes {
@@ -43,53 +59,53 @@ const query = `
 `;
 
 export async function fetchUserStats(formData: FormData): Promise<{ error?: string; data?: WrappedStats }> {
-    const username = formData.get("username") as string;
+  const username = formData.get("username") as string;
 
-    if (!username) {
-        return { error: "Username is required" };
+  if (!username) {
+    return { error: "Username is required" };
+  }
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    return { error: "GitHub Token not configured on server" };
+  }
+
+  try {
+    const res = await fetch(GITHUB_GRAPHQL_API, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables: { username },
+      }),
+      next: { revalidate: 60 }, // Cache for 60s
+    });
+
+    if (!res.ok) {
+      return { error: `GitHub API Error: ${res.statusText}` };
     }
 
-    const token = process.env.GITHUB_TOKEN;
-    if (!token) {
-        return { error: "GitHub Token not configured on server" };
+    const json = await res.json();
+
+    if (json.errors) {
+      // Handle "Could not resolve to a User" specifically if possible, or generic
+      return { error: json.errors[0].message || "User not found or API error" };
     }
 
-    try {
-        const res = await fetch(GITHUB_GRAPHQL_API, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                query,
-                variables: { username },
-            }),
-            next: { revalidate: 60 }, // Cache for 60s
-        });
-
-        if (!res.ok) {
-            return { error: `GitHub API Error: ${res.statusText}` };
-        }
-
-        const json = await res.json();
-
-        if (json.errors) {
-            // Handle "Could not resolve to a User" specifically if possible, or generic
-            return { error: json.errors[0].message || "User not found or API error" };
-        }
-
-        if (!json.data || !json.data.user) {
-            return { error: "User not found" };
-        }
-
-        const userData: UserData = json.data.user;
-        const stats = calculateStats(userData);
-
-        return { data: stats };
-
-    } catch (err: any) {
-        console.error(err);
-        return { error: "Internal Server Error" };
+    if (!json.data || !json.data.user) {
+      return { error: "User not found" };
     }
+
+    const userData: UserData = json.data.user;
+    const stats = calculateStats(userData);
+
+    return { data: stats };
+
+  } catch (err: any) {
+    console.error(err);
+    return { error: "Internal Server Error" };
+  }
 }

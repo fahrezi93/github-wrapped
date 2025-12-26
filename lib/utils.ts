@@ -42,6 +42,22 @@ export interface UserData {
             totalContributions: number;
             weeks: Week[];
         };
+        commitContributionsByRepository: {
+            repository: {
+                name: string;
+                description: string | null;
+                stargazerCount: number;
+                languages: {
+                    nodes: {
+                        name: string;
+                        color: string;
+                    }[];
+                };
+            };
+            contributions: {
+                totalCount: number;
+            };
+        }[];
     };
     topRepositories: {
         nodes: Repository[];
@@ -64,13 +80,21 @@ export interface WrappedStats {
     currentStreak: number;
     busiestDay: { date: string; count: number };
     topLanguages: LanguageStat[];
-    personality: "Weekend Warrior" | "9-to-5 Pro";
+    personality: "Weekend Warrior" | "9-to-5 Pro" | "The Architect" | "Bug Hunter";
     rank: string;
     contributionBreakdown: {
         commits: number;
         issues: number;
         prs: number;
     };
+    weeks: Week[]; // Raw calendar data for visualization
+    topProject: {
+        name: string;
+        commits: number;
+        description: string;
+        stars: number;
+        language: { name: string; color: string } | null;
+    } | null;
 }
 
 export function calculateStats(data: UserData): WrappedStats {
@@ -131,7 +155,17 @@ export function calculateStats(data: UserData): WrappedStats {
     // Calculate Personality
     const totalForPersonality = weekendContributions + weekdayContributions;
     const weekendRatio = totalForPersonality > 0 ? weekendContributions / totalForPersonality : 0;
-    const personality = weekendRatio > 0.2 ? "Weekend Warrior" : "9-to-5 Pro";
+
+    let personality: WrappedStats['personality'] = "9-to-5 Pro";
+    if (weekendRatio > 0.2) personality = "Weekend Warrior";
+
+    // Add more personalities
+    if (data.contributionsCollection.totalIssueContributions > data.contributionsCollection.totalCommitContributions) {
+        personality = "Bug Hunter";
+    }
+    if (data.contributionsCollection.totalPullRequestContributions > 100) {
+        personality = "The Architect";
+    }
 
     // Top Languages
     const languageMap: Record<string, { size: number; color: string }> = {};
@@ -164,10 +198,26 @@ export function calculateStats(data: UserData): WrappedStats {
     // Rank
     let rank = "Tourist";
     if (total >= 1000) rank = "10x Engineer";
-    else if (total >= 500) rank = "Senior dev";
+    else if (total >= 500) rank = "Senior Dev";
     else if (total >= 200) rank = "Contributor";
     else if (total >= 100) rank = "Hobbyist";
     else rank = "Tourist";
+
+    // Top Project
+    let topProject = null;
+    if (data.contributionsCollection.commitContributionsByRepository && data.contributionsCollection.commitContributionsByRepository.length > 0) {
+        const topRepo = data.contributionsCollection.commitContributionsByRepository[0];
+        topProject = {
+            name: topRepo.repository.name,
+            commits: topRepo.contributions.totalCount,
+            description: topRepo.repository.description || "",
+            stars: topRepo.repository.stargazerCount,
+            language: topRepo.repository.languages.nodes[0] ? {
+                name: topRepo.repository.languages.nodes[0].name,
+                color: topRepo.repository.languages.nodes[0].color
+            } : null
+        };
+    }
 
     return {
         username: data.name || "User",
@@ -184,6 +234,8 @@ export function calculateStats(data: UserData): WrappedStats {
             commits: data.contributionsCollection.totalCommitContributions,
             issues: data.contributionsCollection.totalIssueContributions,
             prs: data.contributionsCollection.totalPullRequestContributions
-        }
+        },
+        weeks: calendar.weeks,
+        topProject
     };
 }
