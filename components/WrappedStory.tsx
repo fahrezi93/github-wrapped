@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WrappedStats } from "@/lib/utils";
-import { X, Trophy, Flame, Calendar, Github, Download, Share2, Code2, Moon, Sun, Volume2, VolumeX, Sparkles } from "lucide-react";
+import { X, Trophy, Flame, Calendar, Github, Download, Share2, Code, Code2, Moon, Sun, Volume2, VolumeX, Sparkles, GitCommit, BarChart3, Star, Zap } from "lucide-react";
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 
@@ -13,7 +13,13 @@ interface WrappedStoryProps {
 }
 
 const SLIDE_DURATION = 6000;
-const MUSIC_URL = "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"; // Royalty-free placeholder
+
+// CARA GANTI LAGU:
+// 1. Online URL: Ganti string di bawah dengan link MP3 langsung.
+// 2. Local File:
+//    - Masukkan file MP3 ke folder "public" (misal: "my-song.mp3")
+//    - Ganti URL menjadi: "/my-song.mp3"
+const MUSIC_URL = "/mixkit-beautiful-dream-493.mp3";
 
 const variants = {
     enter: (direction: number) => ({
@@ -365,77 +371,141 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
         },
         {
             id: "summary",
-            className: "bg-[#050505]",
+            className: "bg-[#0d1117]",
             content: (
-                <div className="flex flex-col items-center justify-center h-full w-full p-6 space-y-8">
-                    <h2 className="text-white/40 text-sm tracking-[0.5em] uppercase animate-pulse">Your 2024 Wrapped</h2>
-
+                <div className="flex flex-col items-center justify-center h-full w-full p-4 overflow-y-auto">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
                         ref={summaryRef}
-                        className="w-full max-w-[340px] bg-gradient-to-br from-[#1a1a1a] to-black p-8 rounded-[40px] border border-white/10 shadow-2xl flex flex-col items-center text-center space-y-6 relative overflow-hidden"
+                        className="w-full max-w-sm bg-[#0d1117] rounded-3xl p-6 border border-gray-800 shadow-2xl relative overflow-hidden"
                     >
-                        <div className="absolute -top-[100px] -right-[100px] w-[200px] h-[200px] bg-indigo-500 blur-[80px] opacity-20" />
-                        <div className="absolute -bottom-[100px] -left-[100px] w-[200px] h-[200px] bg-pink-500 blur-[80px] opacity-20" />
+                        {/* Background subtle grid */}
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
 
-                        <div className="relative">
-                            <img src={data.avatarUrl} className="w-24 h-24 rounded-full border-4 border-indigo-500/30 shadow-xl" alt="avatar" />
-                            <div className="absolute -bottom-2 -right-2 bg-indigo-600 rounded-full p-2 border-4 border-[#1a1a1a]">
-                                <Github size={16} className="text-white" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <h2 className="text-3xl font-black text-white tracking-tight">{data.username}</h2>
-                            <p className="text-indigo-400 text-sm font-medium mt-1 uppercase tracking-wider">{data.personality}</p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 w-full">
-                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
-                                <p className="text-white/40 text-[10px] uppercase font-bold mb-1">Total Impact</p>
-                                <p className="text-white font-bold text-2xl">{data.totalContributions}</p>
-                            </div>
-                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
-                                <p className="text-white/40 text-[10px] uppercase font-bold mb-1">Best Streak</p>
-                                <p className="text-white font-bold text-2xl">{data.longestStreak}<span className="text-xs text-white/50 ml-1">days</span></p>
-                            </div>
-                        </div>
-
-                        <div className="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 p-4 rounded-2xl w-full border border-indigo-500/20">
-                            <p className="text-indigo-200/60 text-[10px] uppercase font-bold mb-2">Top Technology</p>
-                            <div className="flex items-center justify-between">
-                                <span className="text-white font-bold text-xl">{data.topLanguages[0]?.name || "N/A"}</span>
-                                <div className="h-2 flex-1 mx-3 bg-indigo-950 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-indigo-400 rounded-full"
-                                        style={{ width: `${data.topLanguages[0]?.percentage || 0}%` }}
-                                    />
+                        {/* Header */}
+                        <div className="relative z-10 flex items-center gap-4 mb-6">
+                            <div className="relative">
+                                <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-pink-500 to-purple-500">
+                                    <img src={data.avatarUrl} className="w-full h-full rounded-full border-2 border-[#0d1117]" alt="avatar" />
                                 </div>
-                                <span className="text-indigo-300 font-mono text-xs">{data.topLanguages[0]?.percentage || 0}%</span>
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-white leading-none">@{data.username}</h2>
+                                <p className="text-pink-400 text-sm font-medium mt-1">2024 Year in Code</p>
                             </div>
                         </div>
 
-                        <div className="w-full pt-4 border-t border-white/5 flex justify-between items-center opacity-50">
-                            <span className="text-[10px] text-white tracking-widest">GITHUB WRAPPED 2024</span>
-                            <Sparkles size={12} className="text-yellow-200" />
+                        {/* Mini Heatmap */}
+                        <div className="relative z-10 bg-[#161b22] rounded-xl p-3 mb-6 border border-gray-800 flex flex-col justify-between h-32">
+                            <div className="flex gap-[2px] h-full overflow-hidden opacity-80 mask-image-gradient">
+                                {data.weeks.slice(-20).map((week, wIdx) => (
+                                    <div key={wIdx} className="flex flex-col gap-[2px] flex-1">
+                                        {week.contributionDays.map((day, dIdx) => (
+                                            <div
+                                                key={dIdx}
+                                                className={`flex-1 rounded-[1px] ${day.contributionCount > 0 ? 'bg-green-500' : 'bg-gray-800'}`}
+                                                style={{ opacity: day.contributionCount > 0 ? Math.min(0.4 + (day.contributionCount * 0.1), 1) : 0.2 }}
+                                            />
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">{data.totalContributions} contributions in 2024</p>
                         </div>
+
+                        {/* Stats Grid */}
+                        <div className="relative z-10 grid grid-cols-2 gap-3 mb-6">
+                            {/* Items */}
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Trophy size={14} className="text-yellow-500" />
+                                    <span className="text-gray-400 text-xs">Universal Rank</span>
+                                </div>
+                                <p className="text-yellow-400 font-bold text-lg">{data.rank}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Flame size={14} className="text-orange-500" />
+                                    <span className="text-gray-400 text-xs">Longest Streak</span>
+                                </div>
+                                <p className="text-orange-400 font-bold text-lg">{data.longestStreak} days</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <GitCommit size={14} className="text-pink-500" />
+                                    <span className="text-gray-400 text-xs">Total Commits</span>
+                                </div>
+                                <p className="text-pink-400 font-bold text-lg">{data.contributionBreakdown.commits}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Calendar size={14} className="text-blue-400" />
+                                    <span className="text-gray-400 text-xs">Most Active Month</span>
+                                </div>
+                                <p className="text-blue-400 font-bold text-lg truncate">{data.mostActiveMonth}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <BarChart3 size={14} className="text-green-400" />
+                                    <span className="text-gray-400 text-xs">Most Active Day</span>
+                                </div>
+                                <p className="text-green-400 font-bold text-lg">{data.mostActiveDayName}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Star size={14} className="text-yellow-400" />
+                                    <span className="text-gray-400 text-xs">Total Stars</span>
+                                </div>
+                                <p className="text-yellow-400 font-bold text-lg">{data.totalStarsEarned}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Code size={14} className="text-blue-500" />
+                                    <span className="text-gray-400 text-xs">Top Language</span>
+                                </div>
+                                <p className="text-blue-500 font-bold text-lg truncate">{data.topLanguages[0]?.name || "N/A"}</p>
+                            </div>
+
+                            <div className="bg-[#161b22] p-3 rounded-xl border border-gray-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Zap size={14} className="text-purple-500" />
+                                    <span className="text-gray-400 text-xs">Power Level</span>
+                                </div>
+                                <p className="text-purple-500 font-bold text-lg truncate">{data.personality}</p>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-800 relative z-10">
+                            <span className="text-gray-600 text-xs">git-wrapped.com</span>
+                            <div className="flex items-center gap-1 text-gray-600">
+                                <Github size={12} />
+                            </div>
+                        </div>
+
                     </motion.div>
 
-                    <div className="flex flex-col gap-3 w-full max-w-[340px]">
-                        <button
-                            onClick={downloadSummary}
-                            className="group w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-4 rounded-2xl transition-all active:scale-95 hover:bg-gray-100 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                        >
-                            <Download size={20} className="group-hover:-translate-y-1 transition-transform" />
-                            <span>Save to Gallery</span>
-                        </button>
+                    <div className="flex gap-4 w-full max-w-sm mt-6">
                         <button
                             onClick={onClose}
-                            className="w-full text-white/40 hover:text-white py-2 text-sm transition-colors"
+                            className="p-4 rounded-xl bg-[#161b22] text-white hover:bg-[#1f242c] transition-colors border border-gray-700"
                         >
-                            Close
+                            <X size={20} />
+                        </button>
+                        <button
+                            onClick={downloadSummary}
+                            className="flex-1 flex items-center justify-center gap-2 bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors shadow-lg"
+                        >
+                            <Download size={18} />
+                            <span>Download</span>
                         </button>
                     </div>
                 </div>
@@ -488,12 +558,16 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     }, [currentIndex, goNext, isPaused, triggerConfetti, slidesData.length]);
 
     const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
-        if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+        // Prevent nav if clicking buttons (like mute/close/download)
+        if ((e.target as HTMLElement).closest('button')) return;
 
         const screenWidth = window.innerWidth;
         const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
 
-        if (clientX < screenWidth / 3) {
+        // Instagram Logic:
+        // Left 30% -> Previous Slide
+        // Right 70% -> Next Slide
+        if (clientX < screenWidth * 0.3) {
             goPrev();
         } else {
             goNext();

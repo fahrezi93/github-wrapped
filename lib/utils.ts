@@ -59,6 +59,12 @@ export interface UserData {
             };
         }[];
     };
+    repositories: {
+        nodes: {
+            name: string;
+            stargazerCount: number;
+        }[];
+    };
     topRepositories: {
         nodes: Repository[];
     };
@@ -80,7 +86,7 @@ export interface WrappedStats {
     currentStreak: number;
     busiestDay: { date: string; count: number };
     topLanguages: LanguageStat[];
-    personality: "Weekend Warrior" | "9-to-5 Pro" | "The Architect" | "Bug Hunter";
+    personality: "Weekend Warrior" | "9-to-5 Pro" | "The Architect" | "Bug Hunter" | "Ninja";
     rank: string;
     contributionBreakdown: {
         commits: number;
@@ -95,6 +101,9 @@ export interface WrappedStats {
         stars: number;
         language: { name: string; color: string } | null;
     } | null;
+    totalStarsEarned: number;
+    mostActiveMonth: string;
+    mostActiveDayName: string;
 }
 
 export function calculateStats(data: UserData): WrappedStats {
@@ -135,6 +144,10 @@ export function calculateStats(data: UserData): WrappedStats {
     let weekendContributions = 0;
     let weekdayContributions = 0;
 
+    // Stats accumulators
+    const dayCounts = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+    const monthCounts: Record<string, number> = {};
+
     days.forEach((day) => {
         // Track busiest day (specific date)
         if (day.contributionCount > maxDayCount) {
@@ -142,8 +155,15 @@ export function calculateStats(data: UserData): WrappedStats {
             busiestDayDate = day.date;
         }
 
-        // Weekday vs Weekend (0=Sunday, 6=Saturday)
         if (day.contributionCount > 0) {
+            // Weekday stats
+            dayCounts[day.weekday] += day.contributionCount;
+
+            // Month stats
+            const monthName = new Date(day.date).toLocaleString('default', { month: 'long' });
+            monthCounts[monthName] = (monthCounts[monthName] || 0) + day.contributionCount;
+
+            // Weekend vs Weekday ratio
             if (day.weekday === 0 || day.weekday === 6) {
                 weekendContributions += day.contributionCount;
             } else {
@@ -151,6 +171,27 @@ export function calculateStats(data: UserData): WrappedStats {
             }
         }
     });
+
+    // Most Active Day Name
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const mostActiveDayIndex = dayCounts.indexOf(Math.max(...dayCounts));
+    const mostActiveDayName = daysOfWeek[mostActiveDayIndex];
+
+    // Most Active Month
+    let mostActiveMonth = Object.keys(monthCounts)[0] || "January";
+    let maxMonthCount = 0;
+    for (const [month, count] of Object.entries(monthCounts)) {
+        if (count > maxMonthCount) {
+            maxMonthCount = count;
+            mostActiveMonth = month;
+        }
+    }
+
+    // Total Stars
+    let totalStarsEarned = 0;
+    if (data.repositories && data.repositories.nodes) {
+        totalStarsEarned = data.repositories.nodes.reduce((acc, repo) => acc + repo.stargazerCount, 0);
+    }
 
     // Calculate Personality
     const totalForPersonality = weekendContributions + weekdayContributions;
@@ -165,6 +206,9 @@ export function calculateStats(data: UserData): WrappedStats {
     }
     if (data.contributionsCollection.totalPullRequestContributions > 100) {
         personality = "The Architect";
+    }
+    if (maxStreak > 30) {
+        personality = "Ninja";
     }
 
     // Top Languages
@@ -236,6 +280,9 @@ export function calculateStats(data: UserData): WrappedStats {
             prs: data.contributionsCollection.totalPullRequestContributions
         },
         weeks: calendar.weeks,
-        topProject
+        topProject,
+        totalStarsEarned,
+        mostActiveMonth,
+        mostActiveDayName
     };
 }

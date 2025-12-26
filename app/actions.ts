@@ -40,6 +40,12 @@ const query = `
           }
         }
       }
+      repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: STARGAZERS, direction: DESC}) {
+        nodes {
+          name
+          stargazerCount
+        }
+      }
       topRepositories(first: 6, orderBy: {field: STARGAZERS, direction: DESC}) {
         nodes {
           name
