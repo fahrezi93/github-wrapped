@@ -61,11 +61,31 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     const [direction, setDirection] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [slideReady, setSlideReady] = useState(false);
+    const [animationKey, setAnimationKey] = useState(0);
     const summaryRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const isFirstMount = useRef(true);
 
     // Initial references for confetti
     const slidesRef = useRef(null);
+
+    // Reset slideReady when slide changes or on first mount
+    useEffect(() => {
+        setSlideReady(false);
+        // Increment animation key to force re-render of animations
+        setAnimationKey(prev => prev + 1);
+
+        // Longer delay on first mount to ensure the story view transition is complete
+        const delay = isFirstMount.current ? 600 : 450;
+
+        const timer = setTimeout(() => {
+            setSlideReady(true);
+            isFirstMount.current = false;
+        }, delay);
+
+        return () => clearTimeout(timer);
+    }, [currentIndex]);
 
     const downloadSummary = async () => {
         if (summaryRef.current) {
@@ -91,13 +111,14 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay" />
 
                     <motion.div
+                        key={`intro-2025-${animationKey}`}
                         initial="hidden"
-                        animate="visible"
+                        animate={slideReady && currentIndex === 0 ? "visible" : "hidden"}
                         variants={{
                             hidden: { opacity: 0 },
                             visible: {
                                 opacity: 1,
-                                transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+                                transition: { staggerChildren: 0.12, delayChildren: 0.1 }
                             }
                         }}
                         className="relative flex flex-col items-center justify-center -space-y-4 md:-space-y-6 scale-110 md:scale-125 mb-12"
@@ -112,13 +133,14 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             <motion.h1
                                 key={idx}
                                 variants={{
-                                    hidden: { y: 60, opacity: 0, filter: "blur(20px)" },
-                                    visible: { y: layer.y, opacity: layer.opacity, filter: "blur(0px)" }
+                                    hidden: { y: 100, opacity: 0, filter: "blur(25px)", scale: 0.7 },
+                                    visible: { y: layer.y, opacity: layer.opacity, filter: "blur(0px)", scale: 1 }
                                 }}
                                 transition={{
                                     type: "spring",
-                                    stiffness: 200,
-                                    damping: 18
+                                    stiffness: 120,
+                                    damping: 12,
+                                    mass: 0.8
                                 }}
                                 className={`text-[6rem] md:text-[8rem] font-black tracking-tighter leading-none ${layer.color} select-none`}
                                 style={{ zIndex: idx }}
@@ -129,9 +151,10 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
+                        key={`intro-avatar-${animationKey}`}
+                        initial={{ opacity: 0, y: 60, scale: 0.85 }}
+                        animate={slideReady && currentIndex === 0 ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 60, scale: 0.85 }}
+                        transition={{ delay: 0.5, duration: 0.6, type: "spring", stiffness: 120 }}
                         className="relative z-20 flex flex-col items-center"
                     >
                         <div className="relative">
@@ -625,14 +648,25 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
         // Prevent nav if clicking buttons (like mute/close/download)
         if ((e.target as HTMLElement).closest('button')) return;
+        if ((e.target as HTMLElement).closest('a')) return;
 
-        const screenWidth = window.innerWidth;
-        const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+        // Get the container element (the clicked element or its parent)
+        const container = e.currentTarget as HTMLElement;
+        const rect = container.getBoundingClientRect();
+
+        // Get click position relative to container
+        const clientX = 'touches' in e
+            ? (e as React.TouchEvent).touches[0]?.clientX || (e as React.TouchEvent).changedTouches[0]?.clientX
+            : (e as React.MouseEvent).clientX;
+
+        // Calculate relative position within the container
+        const relativeX = clientX - rect.left;
+        const containerWidth = rect.width;
 
         // Instagram Logic:
         // Left 30% -> Previous Slide
         // Right 70% -> Next Slide
-        if (clientX < screenWidth * 0.3) {
+        if (relativeX < containerWidth * 0.3) {
             goPrev();
         } else {
             goNext();
