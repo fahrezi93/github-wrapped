@@ -45,10 +45,11 @@ const variants = {
 };
 
 const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
+    hidden: { y: 30, opacity: 0, filter: "blur(10px)" },
     visible: {
         y: 0,
         opacity: 1,
+        filter: "blur(0px)",
         transition: { type: "spring" as const, stiffness: 300, damping: 20 }
     }
 };
@@ -89,7 +90,18 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     {/* Background Animation */}
                     <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay" />
 
-                    <div className="relative flex flex-col items-center justify-center -space-y-4 md:-space-y-6 scale-110 md:scale-125 mb-12">
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={{
+                            hidden: { opacity: 0 },
+                            visible: {
+                                opacity: 1,
+                                transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+                            }
+                        }}
+                        className="relative flex flex-col items-center justify-center -space-y-4 md:-space-y-6 scale-110 md:scale-125 mb-12"
+                    >
                         {[
                             { color: "text-purple-600", opacity: 0.2, y: -20 },
                             { color: "text-pink-600", opacity: 0.4, y: -10 },
@@ -99,13 +111,14 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         ].map((layer, idx) => (
                             <motion.h1
                                 key={idx}
-                                initial={{ y: 100, opacity: 0 }}
-                                animate={{ y: layer.y, opacity: layer.opacity }}
+                                variants={{
+                                    hidden: { y: 60, opacity: 0, filter: "blur(20px)" },
+                                    visible: { y: layer.y, opacity: layer.opacity, filter: "blur(0px)" }
+                                }}
                                 transition={{
-                                    delay: idx * 0.1,
                                     type: "spring",
-                                    stiffness: 100,
-                                    damping: 20
+                                    stiffness: 200,
+                                    damping: 18
                                 }}
                                 className={`text-[6rem] md:text-[8rem] font-black tracking-tighter leading-none ${layer.color} select-none`}
                                 style={{ zIndex: idx }}
@@ -113,12 +126,12 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                                 2025
                             </motion.h1>
                         ))}
-                    </div>
+                    </motion.div>
 
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
+                        transition={{ delay: 0.3 }}
                         className="relative z-20 flex flex-col items-center"
                     >
                         <div className="relative">
