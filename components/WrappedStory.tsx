@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WrappedStats } from "@/lib/utils";
-import { X, Trophy, Flame, Calendar, Github, Download, Share2, Code, Code2, Moon, Sun, Volume2, VolumeX, Sparkles, GitCommit, BarChart3, Star, Zap } from "lucide-react";
+import { X, Trophy, Flame, Calendar, Github, Download, Share2, Code, Code2, Moon, Sun, Volume2, VolumeX, Sparkles, GitCommit, BarChart3, Star, Zap, Briefcase, Bug, Ruler, Swords } from "lucide-react";
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 
@@ -27,6 +27,7 @@ const variants = {
         opacity: 0,
         scale: 0.9,
         rotateY: direction > 0 ? 45 : -45,
+        filter: "blur(10px)",
     }),
     center: {
         x: 0,
@@ -45,7 +46,7 @@ const variants = {
 };
 
 const itemVariants = {
-    hidden: { y: 30, opacity: 0, filter: "blur(10px)" },
+    hidden: { y: 30, opacity: 0, filter: "blur(10px)" }, // Ensure hidden items are blurred too if used elsewhere
     visible: {
         y: 0,
         opacity: 1,
@@ -76,8 +77,8 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
         // Increment animation key to force re-render of animations
         setAnimationKey(prev => prev + 1);
 
-        // Longer delay on first mount to ensure the story view transition is complete
-        const delay = isFirstMount.current ? 600 : 450;
+        // Longer delay on first mount to ensure the story view transition is complete and fully visible to user
+        const delay = isFirstMount.current ? 300 : 450;
 
         const timer = setTimeout(() => {
             setSlideReady(true);
@@ -118,7 +119,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             hidden: { opacity: 0 },
                             visible: {
                                 opacity: 1,
-                                transition: { staggerChildren: 0.12, delayChildren: 0.1 }
+                                transition: { staggerChildren: 0.1, delayChildren: 0.05 }
                             }
                         }}
                         className="relative flex flex-col items-center justify-center -space-y-4 md:-space-y-6 scale-110 md:scale-125 mb-12"
@@ -138,8 +139,8 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                                 }}
                                 transition={{
                                     type: "spring",
-                                    stiffness: 120,
-                                    damping: 12,
+                                    stiffness: 200,
+                                    damping: 20,
                                     mass: 0.8
                                 }}
                                 className={`text-[6rem] md:text-[8rem] font-black tracking-tighter leading-none ${layer.color} select-none`}
@@ -178,37 +179,61 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
         },
         {
             id: "numbers",
-            className: "bg-gradient-to-br from-[#1a1c2c] to-[#4a192c]",
+            className: "bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]",
             content: (
-                <div className="flex flex-col items-center justify-center h-full text-center p-6 relative">
-                    <Github className="w-[400px] h-[400px] text-white/[0.03] absolute -right-20 -top-20 -rotate-12" />
+                <div className="flex flex-col items-center justify-center h-full text-center p-6 relative overflow-hidden">
+                    {/* Background decor */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+                    <div className="absolute top-10 right-10 opacity-10 animate-pulse delay-700">
+                        <Zap className="w-32 h-32 text-yellow-400" />
+                    </div>
+                    <div className="absolute bottom-20 left-10 opacity-5 animate-bounce duration-[3000ms]">
+                        <Code className="w-24 h-24 text-blue-400" />
+                    </div>
 
-                    <motion.div initial="hidden" animate="visible" variants={itemVariants} className="z-10 w-full font-space">
-                        <h2 className="text-sm font-bold text-pink-400 mb-6 uppercase tracking-[0.3em] border-b border-pink-400/30 pb-2 inline-block font-sans">Total Impact</h2>
-                        <div className="relative inline-block">
-                            <div className="absolute inset-0 bg-pink-500 blur-[60px] opacity-20" />
-                            <h1 className="text-[6rem] leading-none font-black text-white drop-shadow-2xl tracking-tighter mix-blend-overlay font-outfit">
+                    <motion.div initial="hidden" animate="visible" variants={itemVariants} className="z-10 w-full font-space flex flex-col items-center">
+                        <div className="flex items-center gap-2 text-indigo-300 mb-6 uppercase tracking-[0.3em] font-bold text-sm bg-white/5 py-1 px-4 rounded-full border border-white/10 backdrop-blur-sm">
+                            <Sparkles size={14} /> Total Impact
+                        </div>
+
+                        <div className="relative inline-block mb-4">
+                            <div className="absolute inset-0 bg-indigo-500 blur-[80px] opacity-30" />
+                            <h1 className="text-[7rem] leading-none font-black text-white drop-shadow-2xl tracking-tighter font-outfit">
                                 {data.totalContributions >= 1000 ? (data.totalContributions / 1000).toFixed(1) + 'k' : data.totalContributions}
                             </h1>
                         </div>
-                        <p className="text-white/60 mt-4 text-xl font-light italic font-marker transform -rotate-1">
-                            contributions made in 2025
+
+                        <p className="text-white/60 text-xl font-light font-marker transform -rotate-1 mb-6">
+                            contributions in 2025
                         </p>
+
+                        {/* Rank Badge */}
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.4, type: "spring" }}
+                            className="bg-gradient-to-r from-amber-200 to-yellow-500 text-black font-black px-6 py-2 rounded-full shadow-[0_0_20px_rgba(251,191,36,0.4)] flex items-center gap-2 transform rotate-1 hover:scale-105 transition-transform"
+                        >
+                            <Trophy size={18} className="text-black" />
+                            <span className="uppercase tracking-wide text-sm">{data.rank}</span>
+                        </motion.div>
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                        className="mt-16 grid grid-cols-3 gap-4 w-full"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-12 grid grid-cols-3 gap-3 w-full"
                     >
                         {[
-                            { label: 'Commits', value: data.contributionBreakdown?.commits, color: 'bg-blue-500' },
-                            { label: 'PRs', value: data.contributionBreakdown?.prs, color: 'bg-purple-500' },
-                            { label: 'Issues', value: data.contributionBreakdown?.issues, color: 'bg-pink-500' }
+                            { label: 'Commits', value: data.contributionBreakdown?.commits, icon: GitCommit, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                            { label: 'PRs', value: data.contributionBreakdown?.prs, icon: Share2, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+                            { label: 'Issues', value: data.contributionBreakdown?.issues, icon: (props: any) => <div {...props} className={props.className + " border-2 border-current rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold leading-none"}>!</div>, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' }
                         ].map((item, i) => (
-                            <div key={i} className="flex flex-col items-center group">
-                                <div className={`w-2 h-2 rounded-full mb-2 ${item.color} shadow-[0_0_10px_currentColor]`} />
-                                <span className="text-3xl font-bold text-white group-hover:scale-110 transition-transform">{item.value || 0}</span>
-                                <span className="text-[10px] text-white/40 uppercase tracking-widest">{item.label}</span>
+                            <div key={i} className={`flex flex-col items-center p-3 rounded-2xl border ${item.bg} ${item.border} backdrop-blur-sm`}>
+                                <item.icon className={`w-6 h-6 mb-2 ${item.color}`} />
+                                <span className="text-2xl font-bold text-white mb-1">{item.value || 0}</span>
+                                <span className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">{item.label}</span>
                             </div>
                         ))}
                     </motion.div>
@@ -258,7 +283,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             className="flex gap-[3px] absolute left-0 px-6"
                             initial={{ x: 0 }}
                             animate={{ x: "-50%" }}
-                            transition={{ ease: "linear", duration: 40, repeat: Infinity, repeatType: "loop" }}
+                            transition={{ ease: "linear", duration: 15, repeat: Infinity, repeatType: "loop" }}
                             style={{ minWidth: "max-content" }}
                         >
                             {/* Duplicate for infinite loop effect if needed, but simple scroll is okay for now */}
@@ -424,35 +449,73 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             className: "bg-gradient-to-tr from-violet-900 to-fuchsia-900",
             content: (
                 <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                    <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: 'spring', duration: 1.5 }}
-                        className="relative"
-                    >
-                        <div className="absolute inset-0 bg-fuchsia-500 blur-[60px] opacity-30" />
-                        {data.personality === "Weekend Warrior" ? (
-                            <Sun className="w-40 h-40 text-yellow-300 mb-8 drop-shadow-[0_0_30px_rgba(253,224,71,0.5)]" />
-                        ) : (
-                            <Moon className="w-40 h-40 text-blue-200 mb-8 drop-shadow-[0_0_30px_rgba(191,219,254,0.5)]" />
-                        )}
-                    </motion.div>
+                    {(() => {
+                        const personalityConfig = {
+                            "Weekend Warrior": {
+                                icon: Sun,
+                                color: "text-yellow-300",
+                                shadow: "rgba(253,224,71,0.5)",
+                                desc: "While the world rests, you build. Your best work happens when the notifications stop."
+                            },
+                            "9-to-5 Pro": {
+                                icon: Briefcase,
+                                color: "text-blue-300",
+                                shadow: "rgba(147,197,253,0.5)",
+                                desc: "Consistent. Reliable. A coding machine. You treat code with the professionalism it deserves."
+                            },
+                            "Bug Hunter": {
+                                icon: Bug,
+                                color: "text-red-400",
+                                shadow: "rgba(248,113,113,0.5)",
+                                desc: "You don't just write code, you purify it. No error escapes your watchful eye."
+                            },
+                            "The Architect": {
+                                icon: Ruler,
+                                color: "text-purple-300",
+                                shadow: "rgba(216,180,254,0.5)",
+                                desc: "You see the big picture. Systems, structures, and patterns are your playground."
+                            },
+                            "Ninja": {
+                                icon: Swords,
+                                color: "text-emerald-300",
+                                shadow: "rgba(110,231,183,0.5)",
+                                desc: "Fast. Precise. Deadly. You commit code before the build server even wakes up."
+                            }
+                        };
 
-                    <h2 className="text-xl font-bold text-fuchsia-200 uppercase tracking-[0.2em] mb-4 font-outfit">Your Code Persona</h2>
+                        // Fallback type assertion to handle string indexing
+                        const type = data.personality as keyof typeof personalityConfig;
+                        const config = personalityConfig[type] || personalityConfig["9-to-5 Pro"];
+                        const Icon = config.icon;
 
-                    <motion.div
-                        initial={{ y: 50, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-fuchsia-200 to-fuchsia-400 py-4 leading-tight font-space"
-                    >
-                        {data.personality}
-                    </motion.div>
+                        return (
+                            <>
+                                <motion.div
+                                    initial={{ scale: 0, rotate: -180 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ type: 'spring', duration: 1.5 }}
+                                    className="relative"
+                                >
+                                    <div className="absolute inset-0 bg-white blur-[60px] opacity-20" />
+                                    <Icon className={`w-40 h-40 ${config.color} mb-8 drop-shadow-[0_0_30px_${config.shadow}]`} />
+                                </motion.div>
 
-                    <p className="mt-8 text-white/90 text-2xl max-w-xs font-light leading-relaxed border-t border-white/10 pt-8 font-marker transform -rotate-2">
-                        {data.personality === "Weekend Warrior"
-                            ? "While the world rests, you build. Your best work happens when the notifications stop."
-                            : "Consistent. Reliable. A coding machine. You treat code with the professionalism it deserves."}
-                    </p>
+                                <h2 className="text-xl font-bold text-white/80 uppercase tracking-[0.2em] mb-4 font-outfit">Your Code Persona</h2>
+
+                                <motion.div
+                                    initial={{ y: 50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    className={`text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 py-4 leading-tight font-space`}
+                                >
+                                    {data.personality}
+                                </motion.div>
+
+                                <p className="mt-8 text-white/90 text-2xl max-w-xs font-light leading-relaxed border-t border-white/10 pt-8 font-marker transform -rotate-2">
+                                    {config.desc}
+                                </p>
+                            </>
+                        );
+                    })()}
                 </div>
             )
         },
