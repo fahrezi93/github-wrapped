@@ -15,7 +15,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="group relative w-full overflow-hidden bg-white text-black font-black py-5 px-8 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
+      className="group relative w-full overflow-hidden bg-white text-black font-black py-3.5 px-6 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
     >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
 
@@ -116,15 +116,25 @@ export default function Home() {
                   </p>
                 </div>
 
-                <form action={handleSubmit} className="w-full space-y-6 mt-8">
+                <form
+                  noValidate
+                  action={async (formData) => {
+                    const username = formData.get("username") as string;
+                    if (!username || username.trim() === "") {
+                      setError("Please provide a username to proceed! ✨"); // Custom error message
+                      return;
+                    }
+                    await handleSubmit(formData);
+                  }}
+                  className="w-full space-y-6 mt-8"
+                >
                   <div className="group relative">
                     <input
                       type="text"
                       name="username"
                       id="username"
                       placeholder="Enter GitHub Username"
-                      required
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-white text-center text-xl placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all font-medium group-hover:bg-white/10"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-white text-center text-lg placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all font-medium group-hover:bg-white/10"
                     />
                     {/* Input simple glow */}
                     <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 pointer-events-none" />
@@ -132,12 +142,15 @@ export default function Home() {
 
                   {error && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm flex items-center justify-center gap-2"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="relative"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                      {error}
+                      {/* Custom "Tooltip" style for error */}
+                      <div className="bg-red-500/90 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg mx-auto inline-block border border-red-400/50 backdrop-blur-md">
+                        <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rotate-45" /> {/* Arrow tip */}
+                        ⚠️ {error}
+                      </div>
                     </motion.div>
                   )}
 

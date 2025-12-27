@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-outfit: var(--font-outfit);
+  --font-space: var(--font-space);
+  --font-pixel: var(--font-pixel);
+  --font-marker: var(--font-marker);
 }
 
 body {

@@ -71,7 +71,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             try {
                 const dataUrl = await toPng(summaryRef.current, { cacheBust: true, pixelRatio: 3 });
                 const link = document.createElement('a');
-                link.download = `${data.username}-wrapped-2024.png`;
+                link.download = `${data.username}-wrapped-2025.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (err) {
@@ -83,32 +83,59 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     const slidesData = [
         {
             id: "intro",
-            className: "bg-black",
+            className: "bg-[#0A0A0A]",
             content: (
-                <div className="flex flex-col items-center justify-center h-full text-center p-6 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.15),_transparent_50%)] animate-pulse" />
+                <div className="flex flex-col items-center justify-center h-full text-center p-6 relative overflow-hidden font-outfit">
+                    {/* Background Animation */}
+                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay" />
+
+                    <div className="relative flex flex-col items-center justify-center -space-y-4 md:-space-y-6 scale-110 md:scale-125 mb-12">
+                        {[
+                            { color: "text-purple-600", opacity: 0.2, y: -20 },
+                            { color: "text-pink-600", opacity: 0.4, y: -10 },
+                            { color: "text-indigo-600", opacity: 0.6, y: 0 },
+                            { color: "text-blue-500", opacity: 0.8, y: 10 },
+                            { color: "text-cyan-400", opacity: 1, y: 20 },
+                        ].map((layer, idx) => (
+                            <motion.h1
+                                key={idx}
+                                initial={{ y: 100, opacity: 0 }}
+                                animate={{ y: layer.y, opacity: layer.opacity }}
+                                transition={{
+                                    delay: idx * 0.1,
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 20
+                                }}
+                                className={`text-[6rem] md:text-[8rem] font-black tracking-tighter leading-none ${layer.color} select-none`}
+                                style={{ zIndex: idx }}
+                            >
+                                2025
+                            </motion.h1>
+                        ))}
+                    </div>
 
                     <motion.div
-                        initial="hidden" animate="visible" variants={itemVariants}
-                        transition={{ delay: 0.2 }}
-                        className="relative"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8 }}
+                        className="relative z-20 flex flex-col items-center"
                     >
-                        <div className="absolute inset-0 bg-indigo-500 blur-[40px] opacity-40 rounded-full scale-150" />
-                        <motion.img
-                            src={data.avatarUrl}
-                            alt="Avatar"
-                            className="w-48 h-48 rounded-full border-4 border-white/20 shadow-2xl relative z-10"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1, rotate: 360 }}
-                            transition={{ type: "spring", duration: 1.5 }}
-                        />
-                    </motion.div>
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
+                            <img
+                                src={data.avatarUrl}
+                                alt="Avatar"
+                                className="w-24 h-24 rounded-full border-2 border-white/50 shadow-2xl relative z-10 mb-4"
+                            />
+                        </div>
 
-                    <motion.div initial="hidden" animate="visible" variants={itemVariants} transition={{ delay: 0.4 }} className="mt-12 z-10 px-4">
-                        <h1 className="text-5xl font-black text-white mb-6 tracking-tight">
-                            Hi <span className="text-indigo-400 inline-block transform hover:scale-105 transition-transform">@{data.username}</span>
-                        </h1>
-                        <p className="text-2xl text-gray-400 font-light">Are you ready to see your year in code?</p>
+                        <h2 className="text-3xl font-bold text-white mb-2 font-space">
+                            Hi <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">@{data.username}</span>
+                        </h2>
+                        <p className="font-marker text-xl text-white/50 transform -rotate-2">
+                            Ready for the wrap?
+                        </p>
                     </motion.div>
                 </div>
             )
@@ -120,16 +147,16 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                 <div className="flex flex-col items-center justify-center h-full text-center p-6 relative">
                     <Github className="w-[400px] h-[400px] text-white/[0.03] absolute -right-20 -top-20 -rotate-12" />
 
-                    <motion.div initial="hidden" animate="visible" variants={itemVariants} className="z-10 w-full">
-                        <h2 className="text-sm font-bold text-pink-400 mb-6 uppercase tracking-[0.3em] border-b border-pink-400/30 pb-2 inline-block">Total Impact</h2>
+                    <motion.div initial="hidden" animate="visible" variants={itemVariants} className="z-10 w-full font-space">
+                        <h2 className="text-sm font-bold text-pink-400 mb-6 uppercase tracking-[0.3em] border-b border-pink-400/30 pb-2 inline-block font-sans">Total Impact</h2>
                         <div className="relative inline-block">
                             <div className="absolute inset-0 bg-pink-500 blur-[60px] opacity-20" />
-                            <h1 className="text-[6rem] leading-none font-black text-white drop-shadow-2xl tracking-tighter mix-blend-overlay">
+                            <h1 className="text-[6rem] leading-none font-black text-white drop-shadow-2xl tracking-tighter mix-blend-overlay font-outfit">
                                 {data.totalContributions >= 1000 ? (data.totalContributions / 1000).toFixed(1) + 'k' : data.totalContributions}
                             </h1>
                         </div>
-                        <p className="text-white/60 mt-4 text-xl font-light italic">
-                            contributions made in 2024
+                        <p className="text-white/60 mt-4 text-xl font-light italic font-marker transform -rotate-1">
+                            contributions made in 2025
                         </p>
                     </motion.div>
 
@@ -195,7 +222,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             className="flex gap-[3px] absolute left-0 px-6"
                             initial={{ x: 0 }}
                             animate={{ x: "-50%" }}
-                            transition={{ ease: "linear", duration: 20, repeat: Infinity, repeatType: "loop" }}
+                            transition={{ ease: "linear", duration: 40, repeat: Infinity, repeatType: "loop" }}
                             style={{ minWidth: "max-content" }}
                         >
                             {/* Duplicate for infinite loop effect if needed, but simple scroll is okay for now */}
@@ -241,35 +268,59 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
         },
         {
             id: "languages",
-            className: "bg-black",
+            className: "bg-[#050505]",
             content: (
-                <div className="flex flex-col items-center justify-start pt-24 h-full text-center p-6 w-full max-w-md mx-auto relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-900 rounded-full blur-[100px] opacity-30 pointer-events-none" />
+                <div className="flex flex-col items-center justify-center h-full text-center p-6 w-full max-w-lg mx-auto relative overflow-hidden">
+                    {/* Background Effects */}
+                    <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)] pointer-events-none animate-pulse" />
+                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 pointer-events-none mix-blend-overlay" />
 
-                    <Code2 className="w-16 h-16 text-emerald-400 mb-6" />
-                    <h2 className={`text-4xl font-bold mb-12 ${shinyText}`}>Top Languages</h2>
+                    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8 }}>
+                        <div className="relative mb-12">
+                            <div className="absolute inset-0 bg-emerald-500 blur-[60px] opacity-20" />
+                            <Code2 className="w-20 h-20 text-emerald-400 relative z-10 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" />
+                        </div>
+                    </motion.div>
 
-                    <div className="w-full space-y-6 z-10">
+                    <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-12 tracking-tight">
+                        DATA DNA
+                    </h2>
+
+                    <div className="w-full grid grid-cols-1 gap-6 relative z-10 px-4">
                         {data.topLanguages.map((lang, idx) => (
                             <motion.div
                                 key={lang.name}
-                                initial={{ x: -50, opacity: 0 }}
+                                initial={{ x: -100, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
-                                transition={{ delay: 0.2 + (idx * 0.1), type: "spring" }}
+                                transition={{ delay: 0.3 + (idx * 0.15), type: "spring", stiffness: 100 }}
                                 className="relative group"
                             >
-                                <div className="flex items-end justify-between text-white font-medium mb-2 px-1">
-                                    <span className="text-xl">{lang.name}</span>
-                                    <span className="text-sm opacity-60 font-mono">{lang.percentage}%</span>
-                                </div>
-                                <div className="w-full h-4 bg-gray-800 rounded-full overflow-hidden p-[2px] border border-white/5">
+                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <div className="bg-[#121212] border border-white/10 p-5 rounded-2xl relative shadow-xl backdrop-blur-sm overflow-hidden">
+                                    {/* Progress Background */}
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: `${lang.percentage}%` }}
-                                        transition={{ duration: 1.5, delay: 0.5 + (idx * 0.1), ease: "circOut" }}
-                                        className="h-full rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                                        style={{ backgroundColor: lang.color }}
+                                        transition={{ duration: 1.5, delay: 0.6 + (idx * 0.1) }}
+                                        className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-emerald-900/40 to-transparent opacity-50"
                                     />
+
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div className="flex items-center gap-4">
+                                            <div
+                                                className="w-4 h-12 rounded-full shadow-[0_0_10px_currentColor]"
+                                                style={{ backgroundColor: lang.color, color: lang.color }}
+                                            />
+                                            <div className="text-left">
+                                                <h3 className="text-2xl font-bold text-white tracking-wide">{lang.name}</h3>
+                                                <p className="text-xs text-white/40 font-mono tracking-widest uppercase">Primary Syntax</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-3xl font-black text-white">{lang.percentage}%</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -290,7 +341,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         <Trophy className="w-24 h-24 text-yellow-400 mb-6 drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]" />
                     </motion.div>
 
-                    <h2 className="text-2xl font-bold text-gray-400 mb-2 uppercase tracking-widest">Your Magnum Opus</h2>
+                    <h2 className="text-xl font-bold text-gray-400 mb-2 uppercase tracking-widest font-pixel">Magnum Opus</h2>
 
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
@@ -302,10 +353,10 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         <div className="relative bg-[#0d1117] rounded-xl p-6 flex flex-col items-start text-left h-full">
                             <div className="flex items-center gap-2 mb-4 w-full">
                                 <Github size={20} className="text-white/60" />
-                                <span className="text-sm text-white/60 truncate">{data.username}/{data.topProject.name}</span>
+                                <span className="text-sm text-white/60 truncate font-mono">{data.username}/{data.topProject.name}</span>
                             </div>
 
-                            <h3 className="text-3xl font-bold text-white mb-2 leading-tight break-all">
+                            <h3 className="text-3xl font-bold text-white mb-2 leading-tight break-all font-space">
                                 {data.topProject.name}
                             </h3>
 
@@ -351,17 +402,17 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         )}
                     </motion.div>
 
-                    <h2 className="text-xl font-bold text-fuchsia-200 uppercase tracking-[0.2em] mb-4">Your Code Persona</h2>
+                    <h2 className="text-xl font-bold text-fuchsia-200 uppercase tracking-[0.2em] mb-4 font-outfit">Your Code Persona</h2>
 
                     <motion.div
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-fuchsia-200 to-fuchsia-400 py-4 leading-tight"
+                        className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-fuchsia-200 to-fuchsia-400 py-4 leading-tight font-space"
                     >
                         {data.personality}
                     </motion.div>
 
-                    <p className="mt-8 text-white/90 text-lg max-w-xs font-light leading-relaxed border-t border-white/10 pt-8">
+                    <p className="mt-8 text-white/90 text-2xl max-w-xs font-light leading-relaxed border-t border-white/10 pt-8 font-marker transform -rotate-2">
                         {data.personality === "Weekend Warrior"
                             ? "While the world rests, you build. Your best work happens when the notifications stop."
                             : "Consistent. Reliable. A coding machine. You treat code with the professionalism it deserves."}
@@ -393,7 +444,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-white leading-none">@{data.username}</h2>
-                                <p className="text-pink-400 text-sm font-medium mt-1">2024 Year in Code</p>
+                                <p className="text-pink-400 text-sm font-medium mt-1">2025 Year in Code</p>
                             </div>
                         </div>
 
@@ -412,7 +463,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                                     </div>
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">{data.totalContributions} contributions in 2024</p>
+                            <p className="text-xs text-gray-500 mt-2">{data.totalContributions} contributions in 2025</p>
                         </div>
 
                         {/* Stats Grid */}
@@ -553,7 +604,8 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             return;
         }
 
-        const timer = setTimeout(goNext, SLIDE_DURATION);
+        const currentDuration = slidesData[currentIndex].id === "graph" ? 12000 : SLIDE_DURATION;
+        const timer = setTimeout(goNext, currentDuration);
         return () => clearTimeout(timer);
     }, [currentIndex, goNext, isPaused, triggerConfetti, slidesData.length]);
 
@@ -575,21 +627,29 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     };
 
     useEffect(() => {
+        let mounted = true;
         // Initialize audio
-        audioRef.current = new Audio(MUSIC_URL);
-        audioRef.current.loop = true;
-        audioRef.current.volume = 0.4;
+        const audio = new Audio(MUSIC_URL);
+        audio.loop = true;
+        audio.volume = 0.4;
+        audioRef.current = audio;
 
         // Try to play automatically (might be blocked by browser policy)
-        const playPromise = audioRef.current.play();
+        const playPromise = audio.play();
+
         if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // Auto-play was prevented
-                setIsMuted(true);
-            });
+            playPromise
+                .then(() => {
+                    if (mounted) setIsMuted(false);
+                })
+                .catch((error) => {
+                    console.log("Audio Autoplay prevented:", error);
+                    if (mounted) setIsMuted(true);
+                });
         }
 
         return () => {
+            mounted = false;
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
@@ -629,16 +689,23 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             >
                 {/* Progress Bars */}
                 <div className="absolute top-4 left-0 right-0 z-50 flex gap-2 px-4">
-                    {slidesData.map((_, idx) => (
-                        <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
-                            <motion.div
-                                initial={{ width: currentIndex > idx ? "100%" : "0%" }}
-                                animate={{ width: currentIndex === idx ? "100%" : currentIndex > idx ? "100%" : "0%" }}
-                                transition={{ duration: currentIndex === idx && !isPaused ? SLIDE_DURATION / 1000 : 0, ease: "linear" }}
-                                className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                            />
-                        </div>
-                    ))}
+                    {slidesData.map((slide, idx) => {
+                        const isActive = currentIndex === idx;
+                        const isPast = currentIndex > idx;
+                        const duration = slide.id === "graph" ? 12 : 6;
+
+                        return (
+                            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+                                <motion.div
+                                    key={`${idx}-${isActive}`} // Force remount when active state changes to snap animation
+                                    initial={{ width: isPast ? "100%" : "0%" }}
+                                    animate={{ width: isPast || isActive ? "100%" : "0%" }}
+                                    transition={{ duration: isActive && !isPaused ? duration : 0, ease: "linear" }}
+                                    className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Close Button */}
