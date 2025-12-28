@@ -13,45 +13,34 @@ interface WrappedStoryProps {
 }
 
 const SLIDE_DURATION = 6000;
-
-// CARA GANTI LAGU:
-// 1. Online URL: Ganti string di bawah dengan link MP3 langsung.
-// 2. Local File:
-//    - Masukkan file MP3 ke folder "public" (misal: "my-song.mp3")
-//    - Ganti URL menjadi: "/my-song.mp3"
 const MUSIC_URL = "/mixkit-beautiful-dream-493.mp3";
 
 const variants = {
     enter: (direction: number) => ({
         x: direction > 0 ? "100%" : "-100%",
         opacity: 0,
-        scale: 0.9,
-        rotateY: direction > 0 ? 45 : -45,
-        filter: "blur(10px)",
+        scale: 0.95, // Reduced scaling range
+        // Removed rotateY and blur for performance
     }),
     center: {
         x: 0,
         opacity: 1,
         scale: 1,
-        rotateY: 0,
-        filter: "blur(0px)",
     },
     exit: (direction: number) => ({
         x: direction < 0 ? "100%" : "-100%",
         opacity: 0,
-        scale: 1.1,
-        rotateY: direction < 0 ? 45 : -45,
-        filter: "blur(10px)",
+        scale: 1.05, // Reduced scaling range
+        // Removed rotateY and blur for performance
     }),
 };
 
 const itemVariants = {
-    hidden: { y: 30, opacity: 0, filter: "blur(10px)" }, // Ensure hidden items are blurred too if used elsewhere
+    hidden: { y: 20, opacity: 0 }, // Removed blur
     visible: {
         y: 0,
         opacity: 1,
-        filter: "blur(0px)",
-        transition: { type: "spring" as const, stiffness: 300, damping: 20 }
+        transition: { type: "spring" as const, stiffness: 300, damping: 25 } // Higher damping for less oscillation
     }
 };
 
@@ -109,7 +98,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             content: (
                 <div className="flex flex-col items-center justify-center h-full text-center p-6 relative overflow-hidden font-outfit">
                     {/* Background Animation */}
-                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay" />
+                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none" />
 
                     <motion.div
                         key={`intro-2025-${animationKey}`}
@@ -134,14 +123,14 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             <motion.h1
                                 key={idx}
                                 variants={{
-                                    hidden: { y: 100, opacity: 0, filter: "blur(25px)", scale: 0.7 },
-                                    visible: { y: layer.y, opacity: layer.opacity, filter: "blur(0px)", scale: 1 }
+                                    hidden: { y: 50, opacity: 0, scale: 0.9 },
+                                    visible: { y: layer.y, opacity: layer.opacity, scale: 1 }
                                 }}
                                 transition={{
                                     type: "spring",
-                                    stiffness: 200,
+                                    stiffness: 150,
                                     damping: 20,
-                                    mass: 0.8
+                                    mass: 1
                                 }}
                                 className={`text-[6rem] md:text-[8rem] font-black tracking-tighter leading-none ${layer.color} select-none`}
                                 style={{ zIndex: idx }}
@@ -159,7 +148,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         className="relative z-20 flex flex-col items-center"
                     >
                         <div className="relative">
-                            <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
+                            <div className="absolute inset-0 bg-white/10 rounded-full" />
                             <img
                                 src={data.avatarUrl}
                                 alt="Avatar"
@@ -192,12 +181,12 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     </div>
 
                     <motion.div initial="hidden" animate="visible" variants={itemVariants} className="z-10 w-full font-space flex flex-col items-center">
-                        <div className="flex items-center gap-2 text-indigo-300 mb-6 uppercase tracking-[0.3em] font-bold text-sm bg-white/5 py-1 px-4 rounded-full border border-white/10 backdrop-blur-sm">
+                        <div className="flex items-center gap-2 text-indigo-300 mb-6 uppercase tracking-[0.3em] font-bold text-sm bg-white/5 py-1 px-4 rounded-full border border-white/10">
                             <Sparkles size={14} /> Total Impact
                         </div>
 
                         <div className="relative inline-block mb-4">
-                            <div className="absolute inset-0 bg-indigo-500 blur-[80px] opacity-30" />
+                            <div className="absolute inset-0 bg-indigo-500 opacity-20 rounded-full blur-3xl" />
                             <h1 className="text-[7rem] leading-none font-black text-white drop-shadow-2xl tracking-tighter font-outfit">
                                 {data.totalContributions >= 1000 ? (data.totalContributions / 1000).toFixed(1) + 'k' : data.totalContributions}
                             </h1>
@@ -230,7 +219,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             { label: 'PRs', value: data.contributionBreakdown?.prs, icon: Share2, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
                             { label: 'Issues', value: data.contributionBreakdown?.issues, icon: (props: any) => <div {...props} className={props.className + " border-2 border-current rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold leading-none"}>!</div>, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' }
                         ].map((item, i) => (
-                            <div key={i} className={`flex flex-col items-center p-3 rounded-2xl border ${item.bg} ${item.border} backdrop-blur-sm`}>
+                            <div key={i} className={`flex flex-col items-center p-3 rounded-2xl border ${item.bg} ${item.border}`}>
                                 <item.icon className={`w-6 h-6 mb-2 ${item.color}`} />
                                 <span className="text-2xl font-bold text-white mb-1">{item.value || 0}</span>
                                 <span className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">{item.label}</span>
@@ -246,8 +235,8 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             content: (
                 <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-[url('/noise.svg')] bg-opacity-20">
                     <motion.div
-                        animate={{ scale: [1, 1.2, 1], filter: ["brightness(1)", "brightness(1.5)", "brightness(1)"] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                         className="relative"
                     >
                         <div className="absolute inset-0 bg-orange-500 blur-[50px] opacity-50" />
@@ -258,7 +247,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         <h2 className="text-4xl font-black text-white italic mb-2">UNSTOPPABLE</h2>
                         <div className="h-1 w-20 bg-yellow-400 mx-auto mb-8 rounded-full" />
 
-                        <div className="backdrop-blur-md bg-white/10 p-8 rounded-3xl border border-white/20 shadow-xl">
+                        <div className="bg-white/10 p-8 rounded-3xl border border-white/20 shadow-xl">
                             <p className="text-6xl font-black text-white tracking-tight">{data.longestStreak}</p>
                             <p className="text-xl text-yellow-200 font-medium uppercase tracking-widest mt-2">Day Streak</p>
                         </div>
@@ -278,13 +267,13 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     <p className="text-white/60 mb-12">tells a story of progress.</p>
 
                     {/* Scrolling Heatmap Container */}
-                    <div className="w-full h-64 relative overflow-hidden flex items-center bg-white/5 border-y border-white/10 backdrop-blur-sm -mx-6">
+                    <div className="w-full h-64 relative overflow-hidden flex items-center bg-white/5 border-y border-white/10 -mx-6">
                         <motion.div
                             className="flex gap-[3px] absolute left-0 px-6"
                             initial={{ x: 0 }}
                             animate={{ x: "-50%" }}
-                            transition={{ ease: "linear", duration: 15, repeat: Infinity, repeatType: "loop" }}
-                            style={{ minWidth: "max-content" }}
+                            transition={{ ease: "linear", duration: 20, repeat: Infinity, repeatType: "loop" }}
+                            style={{ minWidth: "max-content", willChange: "transform" }}
                         >
                             {/* Duplicate for infinite loop effect if needed, but simple scroll is okay for now */}
                             {[...data.weeks, ...data.weeks].map((week, wIdx) => (
@@ -301,7 +290,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                                         return (
                                             <div
                                                 key={dIdx}
-                                                className={`w-3 h-3 rounded-[2px] ${bg} ${day.contributionCount > 10 ? 'shadow-[0_0_5px_currentColor]' : ''}`}
+                                                className={`w-3 h-3 rounded-[1px] ${bg}`}
                                                 title={`${day.date}: ${day.contributionCount}`}
                                             />
                                         );
@@ -333,12 +322,12 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             content: (
                 <div className="flex flex-col items-center justify-center h-full text-center p-6 w-full max-w-lg mx-auto relative overflow-hidden">
                     {/* Background Effects */}
-                    <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)] pointer-events-none animate-pulse" />
-                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 pointer-events-none mix-blend-overlay" />
+                    <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 pointer-events-none" />
 
                     <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8 }}>
                         <div className="relative mb-12">
-                            <div className="absolute inset-0 bg-emerald-500 blur-[60px] opacity-20" />
+                            <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-20" />
                             <Code2 className="w-20 h-20 text-emerald-400 relative z-10 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" />
                         </div>
                     </motion.div>
@@ -358,7 +347,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                <div className="bg-[#121212] border border-white/10 p-5 rounded-2xl relative shadow-xl backdrop-blur-sm overflow-hidden">
+                                <div className="bg-[#121212] border border-white/10 p-5 rounded-2xl relative shadow-xl overflow-hidden">
                                     {/* Progress Background */}
                                     <motion.div
                                         initial={{ width: 0 }}
@@ -496,7 +485,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                                     transition={{ type: 'spring', duration: 1.5 }}
                                     className="relative"
                                 >
-                                    <div className="absolute inset-0 bg-white blur-[60px] opacity-20" />
+                                    <div className="absolute inset-0 bg-white blur-3xl opacity-10" />
                                     <Icon className={`w-40 h-40 ${config.color} mb-8 drop-shadow-[0_0_30px_${config.shadow}]`} />
                                 </motion.div>
 
@@ -676,7 +665,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             if (timeLeft <= 0) {
                 return clearInterval(interval);
             }
-            const particleCount = 50 * (timeLeft / duration);
+            const particleCount = 20 * (timeLeft / duration);
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
         }, 250);
@@ -785,7 +774,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             {/* Music Control */}
             <button
                 onClick={toggleMute}
-                className="absolute top-8 left-5 z-[60] bg-black/20 backdrop-blur-md p-3 rounded-full text-white/70 hover:text-white hover:bg-black/40 transition-all border border-white/10"
+                className="absolute top-8 left-5 z-[60] bg-black/40 p-3 rounded-full text-white/70 hover:text-white hover:bg-black/60 transition-all border border-white/10"
             >
                 {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
@@ -805,7 +794,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                         const duration = slide.id === "graph" ? 12 : 6;
 
                         return (
-                            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+                            <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
                                 <motion.div
                                     key={`${idx}-${isActive}`} // Force remount when active state changes to snap animation
                                     initial={{ width: isPast ? "100%" : "0%" }}
@@ -825,9 +814,8 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
 
                 {/* Slide Content */}
                 <div
-                    className="w-full h-full cursor-pointer touch-manipulation perspective-1000"
+                    className="w-full h-full cursor-pointer touch-manipulation"
                     onClick={handleTap}
-                    style={{ perspective: '1000px' }}
                 >
                     <AnimatePresence initial={false} custom={direction} mode="wait">
                         <motion.div
@@ -839,8 +827,7 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                             exit="exit"
                             transition={{
                                 x: { type: "spring", stiffness: 300, damping: 30 },
-                                opacity: { duration: 0.2 },
-                                rotateY: { duration: 0.4 }
+                                opacity: { duration: 0.2 }
                             }}
                             className="absolute inset-0 w-full h-full origin-center"
                         >
