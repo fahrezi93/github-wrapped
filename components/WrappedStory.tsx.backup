@@ -15,7 +15,7 @@ interface WrappedStoryProps {
 const SLIDE_DURATION = 6000;
 const MUSIC_URL = "/mixkit-beautiful-dream-493.mp3";
 
-// Simplified variants - removed scale for better mobile performance
+// Simplified variants for better mobile performance
 const variants = {
     enter: (direction: number) => ({
         x: direction > 0 ? "50%" : "-50%",
@@ -31,13 +31,12 @@ const variants = {
     }),
 };
 
-// Simplified animation - use tween instead of spring for better mobile perf
 const itemVariants = {
     hidden: { y: 10, opacity: 0 },
     visible: {
         y: 0,
         opacity: 1,
-        transition: { duration: 0.2, ease: "easeOut" as const }
+        transition: { type: "tween", duration: 0.3 } // Use tween instead of spring for better mobile perf
     }
 };
 
@@ -53,16 +52,6 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     const summaryRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const isFirstMount = useRef(true);
-
-    // Mobile detection for conditional rendering
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
 
     // Initial references for confetti
     const slidesRef = useRef(null);
@@ -273,29 +262,32 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
                     <h2 className="text-3xl font-bold text-white mb-2">Every Green Square</h2>
                     <p className="text-white/60 mb-12">tells a story of progress.</p>
 
-                    {/* Scrolling Heatmap Container - Optimized for mobile */}
+                    {/* Scrolling Heatmap Container */}
                     <div className="w-full h-64 relative overflow-hidden flex items-center bg-white/5 border-y border-white/10 -mx-6">
                         <motion.div
-                            className="flex gap-[3px] absolute left-0 px-6 gpu-accelerate"
+                            className="flex gap-[3px] absolute left-0 px-6"
                             initial={{ x: 0 }}
                             animate={{ x: "-50%" }}
-                            transition={{ ease: "linear", duration: isMobile ? 30 : 20, repeat: Infinity, repeatType: "loop" }}
+                            transition={{ ease: "linear", duration: 20, repeat: Infinity, repeatType: "loop" }}
                             style={{ minWidth: "max-content", willChange: "transform" }}
                         >
-                            {/* Limit weeks on mobile for better performance */}
-                            {(isMobile ? data.weeks.slice(0, 26) : [...data.weeks, ...data.weeks]).map((week, wIdx) => (
+                            {/* Duplicate for infinite loop effect if needed, but simple scroll is okay for now */}
+                            {[...data.weeks, ...data.weeks].map((week, wIdx) => (
                                 <div key={wIdx} className="flex flex-col gap-[3px]">
                                     {week.contributionDays.map((day, dIdx) => {
+                                        // Calculate easy color based on count
+                                        // 0 = #ebedf0/alpha, 1-3 = low green, etc.
                                         let bg = "bg-white/10";
                                         if (day.contributionCount > 0) bg = "bg-green-900";
                                         if (day.contributionCount > 2) bg = "bg-green-700";
                                         if (day.contributionCount > 5) bg = "bg-green-500";
-                                        if (day.contributionCount > 10) bg = "bg-green-300";
+                                        if (day.contributionCount > 10) bg = "bg-green-300 box-shadow-glow";
 
                                         return (
                                             <div
                                                 key={dIdx}
                                                 className={`w-3 h-3 rounded-[1px] ${bg}`}
+                                                title={`${day.date}: ${day.contributionCount}`}
                                             />
                                         );
                                     })}
@@ -657,15 +649,9 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
     ];
 
     const triggerConfetti = useCallback(() => {
-        // Reduce confetti on mobile for better performance
-        const duration = isMobile ? 1500 : 3000;
+        const duration = 3000;
         const animationEnd = Date.now() + duration;
-        const defaults = {
-            startVelocity: isMobile ? 20 : 30,
-            spread: 360,
-            ticks: isMobile ? 30 : 60,
-            zIndex: 60
-        };
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 60 };
 
         const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
@@ -675,11 +661,11 @@ export default function WrappedStory({ data, onClose }: WrappedStoryProps) {
             if (timeLeft <= 0) {
                 return clearInterval(interval);
             }
-            const particleCount = (isMobile ? 10 : 20) * (timeLeft / duration);
+            const particleCount = 20 * (timeLeft / duration);
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, isMobile ? 400 : 250);
-    }, [isMobile]);
+        }, 250);
+    }, []);
 
     const goNext = useCallback(() => {
         if (currentIndex < slidesData.length - 1) {

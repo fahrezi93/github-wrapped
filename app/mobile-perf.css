@@ -1,0 +1,109 @@
+/* ===== MOBILE PERFORMANCE OPTIMIZATIONS ===== */
+/* This file contains CSS optimizations specifically for mobile devices */
+/* to improve rendering performance and reduce lag */
+
+@media (max-width: 768px) {
+  /* Disable heavy blur effects on mobile - blur is one of the most expensive CSS operations */
+  .blur-3xl,
+  .blur-2xl,
+  .blur-xl,
+  .blur-lg,
+  .blur-md,
+  [class*="blur-["] {
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+
+  /* Reduce box-shadow complexity - shadows are expensive to render */
+  .shadow-2xl,
+  .shadow-xl {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Disable drop-shadow filters */
+  [class*="drop-shadow"] {
+    filter: none !important;
+  }
+
+  /* Simplify backdrop blur - replace with solid background */
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Reduce animation complexity - disable pulsing/bouncing animations */
+  .animate-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .animate-bounce {
+    animation: none !important;
+  }
+
+  /* Optimize transforms for GPU acceleration */
+  [class*="motion"],
+  [class*="animate"] {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Reduce radial gradient complexity on mobile */
+  [class*="bg-[radial-gradient"] {
+    background: rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Simplify background noise overlays */
+  [class*="bg-[url('/noise"] {
+    opacity: 0.05 !important;
+  }
+}
+
+/* GPU acceleration hints for animated elements */
+.gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Optimized transition for touch devices */
+@media (pointer: coarse) {
+  * {
+    /* Slightly faster transitions on touch devices */
+    transition-duration: 0.15s !important;
+  }
+  
+  /* Disable hover effects that cause repaints */
+  .group:hover .group-hover\:opacity-100,
+  .hover\:scale-\[1\.02\]:hover,
+  .hover\:scale-105:hover {
+    transform: none !important;
+    opacity: inherit !important;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize confetti canvas on mobile - reduce particle count effect */
+@media (max-width: 768px) {
+  canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
